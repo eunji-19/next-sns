@@ -3,7 +3,9 @@ export const initialState = {
   isLoggedIn: false,
   isLoggingOut: false, // 로그아웃 시도중
   me: null,
-  signupData: {},
+  isSigningUp: false,
+  // signupData: {},
+  signupData: null,
   loginData: {},
 };
 
@@ -18,6 +20,13 @@ export const loginRequestAction = (data) => {
 export const logoutRequestAction = () => {
   return {
     type: "LOGOUT_REQUEST",
+  };
+};
+
+export const signupRequestAction = (data) => {
+  return {
+    type: "SIGNUP_REQUEST",
+    data,
   };
 };
 
@@ -61,6 +70,23 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         isLoggingOut: false,
+      };
+    case "SIGNUP_REQUEST":
+      return {
+        ...state,
+        isSigningUp: true,
+      };
+    case "SIGNUP_SUCCESS":
+      return {
+        ...state,
+        isSigningUp: false,
+        isLoggedIn: false,
+        signupData: action.data,
+      };
+    case "SIGNUP_FAILURE":
+      return {
+        ...state,
+        isSigningUp: false,
       };
     default:
       return state;

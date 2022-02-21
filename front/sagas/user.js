@@ -107,11 +107,12 @@ function* watchLogout() {
   yield takeLatest("LOGOUT_REQUEST", logout);
 }
 
-function* signup() {
+function* signup(action) {
   try {
     yield delay(1000);
     yield put({
       type: "SIGNUP_SUCCESS",
+      data: action.data,
     });
   } catch (err) {
     yield put({

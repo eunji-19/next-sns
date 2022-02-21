@@ -4,12 +4,17 @@ import AppLayout from "../components/AppLayout";
 import { Button, Checkbox, Form, Input } from "antd";
 import useInput from "../hooks/useInput";
 import styled from "styled-components";
+import { useDispatch, useSelector } from "react-redux";
+import { signupRequestAction } from "../reducers/user";
 
 const ErrorMessage = styled.div`
   color: red;
 `;
 
 const Signup = () => {
+  const dispatch = useDispatch();
+  const { isSigningUp } = useSelector((state) => state.user);
+
   const [id, onChangeId] = useInput("");
   const [password, onChangePassword] = useInput("");
   const [nickname, onChangeNickname] = useInput("");
@@ -43,6 +48,7 @@ const Signup = () => {
       return setTermError(true);
     }
     console.log(id, password, nickname);
+    dispatch(signupRequestAction({ id, password, nickname }));
   }, [password, passwordCheck, term]);
 
   return (
@@ -99,7 +105,7 @@ const Signup = () => {
           {termError && <ErrorMessage>약관에 동의하셔야 합니다.</ErrorMessage>}
         </div>
         <div style={{ marginTop: 10 }}>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit" loading={isSigningUp}>
             가입하기
           </Button>
         </div>
