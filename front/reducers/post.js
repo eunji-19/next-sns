@@ -10,49 +10,12 @@ import produce from "immer";
 import faker from "@faker-js/faker";
 
 export const initialState = {
-  mainPosts: [
-    {
-      id: 1,
-      User: {
-        id: 1,
-        nickname: "Jin",
-      },
-      content: "첫번째 게시글 #해시태그 #익스프레스",
-      Images: [
-        {
-          id: shortId.generate(),
-          src: "https://img1.daumcdn.net/thumb/R658x0.q70/?fname=https://t1.daumcdn.net/news/202108/25/starnews/20210825072239576oxwf.jpg",
-        },
-        {
-          id: shortId.generate(),
-          src: "https://thumb.mtstarnews.com/06/2022/01/2022011507103964279_1.jpg/dims/optimize",
-        },
-        {
-          id: shortId.generate(),
-          src: "http://file3.instiz.net/data/cached_img/upload/2018/08/16/2/6e13f452e2504408730c3f70a292252f.jpg",
-        },
-      ],
-      Comments: [
-        {
-          id: shortId.generate(),
-          User: {
-            id: shortId.generate(),
-            nickname: "RM",
-          },
-          content: "축하드려요:)",
-        },
-        {
-          id: shortId.generate(),
-          User: {
-            id: shortId.generate(),
-            nickname: "J-Hope",
-          },
-          content: "우왕 굳",
-        },
-      ],
-    },
-  ],
+  mainPosts: [],
   imagePaths: [], // 이미지 업로드 할때 이미지 경로들
+  hasMorePost: true,
+  loadPostLoading: false, // 화면 로드 완료 됐을 때
+  loadPostDone: false,
+  loadPostError: null,
   addPostLoading: false, // 게시글 추가가 완료 됐을 때
   addPostDone: false,
   addPostError: null,
@@ -64,8 +27,8 @@ export const initialState = {
   addCommentError: null,
 };
 
-initialState.mainPosts = initialState.mainPosts.concat(
-  Array(20)
+export const generateDummyPost = (number) =>
+  Array(number)
     .fill()
     .map(() => ({
       id: shortId.generate(),
@@ -89,13 +52,18 @@ initialState.mainPosts = initialState.mainPosts.concat(
           content: faker.lorem.sentence(),
         },
       ],
-    }))
-);
+    }));
+
+// initialState.mainPosts = initialState.mainPosts.concat(generateDummyPost(10));
 
 /**
  * Action 이름을 상수로 뺌
  *  - reducer switch 문에서 const 값을 그대로 재활용 할 수 있음
  */
+export const LOAD_POST_REQUEST = "LOAD_POST_REQUEST";
+export const LOAD_POST_SUCCESS = "LOAD_POST_SUCCESS";
+export const LOAD_POST_FAILURE = "LOAD_POST_FAILURE";
+
 export const ADD_POST_REQUEST = "ADD_POST_REQUEST";
 export const ADD_POST_SUCCESS = "ADD_POST_SUCCESS";
 export const ADD_POST_FAILURE = "ADD_POST_FAILURE";
@@ -152,6 +120,23 @@ const reducer = (state = initialState, action) => {
    */
   return produce(state, (draft) => {
     switch (action.type) {
+      case LOAD_POST_REQUEST:
+        draft.loadPostLoading = true;
+        draft.loadPostDone = false;
+        draft.loadPostError = null;
+        break;
+      case LOAD_POST_SUCCESS:
+        draft.loadPostLoading = false;
+        draft.loadPostDone = true;
+        draft.loadPostError = null;
+        // draft.mainPosts.unshift(dummyPost(action.data));
+        draft.mainPosts = action.data.concat(draft.mainPosts);
+        draft.hasMorePost = draft.mainPosts.length < 50;
+        break;
+      case LOAD_POST_FAILURE:
+        draft.loadPostLoading = false;
+        draft.loadPostError = action.error;
+        break;
       case ADD_POST_REQUEST:
         draft.addPostLoading = true;
         draft.addPostDone = false;
