@@ -1,5 +1,16 @@
 import { all, fork, takeLatest, delay, put } from "redux-saga/effects";
 import axios from "axios";
+import {
+  LOGIN_FAILURE,
+  LOGIN_REQUEST,
+  LOGIN_SUCCESS,
+  LOGOUT_FAILURE,
+  LOGOUT_REQUEST,
+  LOGOUT_SUCCESS,
+  SIGNUP_FAILURE,
+  SIGNUP_REQUEST,
+  SIGNUP_SUCCESS,
+} from "../reducers/user";
 
 /**
  * 실제로 서버에 요청을 보내는 함수
@@ -34,14 +45,14 @@ function* login(action) {
     console.log("saga Login");
     yield delay(1000);
     yield put({
-      type: "LOGIN_SUCCESS",
+      type: LOGIN_SUCCESS,
       data: action.data,
       //   data: result.data,
     });
   } catch (err) {
     yield put({
-      type: "LOGIN_FAILURE",
-      data: err.response.data,
+      type: LOGIN_FAILURE,
+      error: err.response.data,
     });
   }
 }
@@ -77,7 +88,7 @@ function* watchLogin() {
   //   yield take("LOGIN_REQUEST", login);
   //   yield takeEvery("LOGIN_REQUEST", login);
   //   yield throttle("LOGIN_REQUEST", login, 2000);
-  yield takeLatest("LOGIN_REQUEST", login);
+  yield takeLatest(LOGIN_REQUEST, login);
 }
 
 function logoutAPI() {
@@ -92,37 +103,38 @@ function* logout() {
      */
     yield delay(1000);
     yield put({
-      type: "LOGOUT_SUCCESS",
+      type: LOGOUT_SUCCESS,
       //   data: result.data,
     });
   } catch (err) {
     yield put({
-      type: "LOGOUT_FAILURE",
-      data: err.response.data,
+      type: LOGOUT_FAILURE,
+      error: err.response.data,
     });
   }
 }
 
 function* watchLogout() {
-  yield takeLatest("LOGOUT_REQUEST", logout);
+  yield takeLatest(LOGOUT_REQUEST, logout);
 }
 
 function* signup(action) {
   try {
     yield delay(1000);
     yield put({
-      type: "SIGNUP_SUCCESS",
+      type: SIGNUP_SUCCESS,
       data: action.data,
     });
   } catch (err) {
     yield put({
-      type: "SIGNUP_FAILURE",
+      type: SIGNUP_FAILURE,
+      error: err.response.data,
     });
   }
 }
 
 function* watchSignup() {
-  yield takeLatest("SIGNUP_REQUEST", signup);
+  yield takeLatest(SIGNUP_REQUEST, signup);
 }
 
 export default function* userSaga() {
