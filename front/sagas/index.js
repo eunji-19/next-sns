@@ -4,7 +4,17 @@
  * saga
  * - effect 앞에는 항상 yield 붙여줌
  */
-import { all, fork, take, call, put } from "redux-saga/effects";
+import {
+  all,
+  fork,
+  take,
+  call,
+  put,
+  takeEvery,
+  takeLatest,
+  throttle,
+  delay,
+} from "redux-saga/effects";
 import axios from "axios";
 
 /**
@@ -36,10 +46,12 @@ function* login(action) {
    * : axios.post("/api/login")
    */
   try {
-    const result = yield call(loginAPI, action.data);
+    // const result = yield call(loginAPI, action.data);
+
+    yield delay(1000);
     yield put({
       type: "LOGIN_SUCCESS",
-      data: result.data,
+      //   data: result.data,
     });
   } catch (err) {
     yield put({
@@ -55,8 +67,32 @@ function* watchLogin() {
    * - LOGIN 액션이 실행될때까지 기다리겠다
    * - LOGIN 액션이 실행되면 login 함수 실행함
    * - saga에서는 eventlistener 같은 느낌을 줌
+   * - 치명적인 단점 : 일회용 (한번 실행되고 사라짐)
+   *  ex) 로그인 -> 로그아웃 -> 로그인 (함수 사라짐)
+   * - while(true) {yield take("LOGIN_REQUEST", login);} -> 동기적으로 실행
+   * // 무한하게 실행됨
+   * takeEvery
+   * - 비동기 동작
+   * - 무한 실행
+   * takeLatest
+   * - 클릭 실수로 2번 했을 때 마지막 요청을 실행함
+   * - 동시에 로딩중인 것만 앞에 것들 취소함
+   * - 완료된 것들은 건드리지 않음
+   * - 응답을 취소하는 것이지 요청을 취소하는 것은 아님 (서버에서 요청이 2번온것 있는지 확인해야함)
+   * throttle
+   * - yield throttle("LOGIN_REQUEST", login, 2000);
+   * : 2초동안 LOGIN_REQUEST는 1번만 실행 가능함
+   * - 시간안에는 액션이 한번만 실행하게 하는 함수
+   * => 대부분의 경우 takeLatest 사용 (서버에서 검증)
+   * - 스크롤 할 때 많이 사용
+   * - 마지막 함수가 호출 된 후 일정 시간이 지나기 전에 다시 호출되지 않도록 하는 것
+   * debounce
+   * - 연이어 호출되는 함수들 중 마지막 함수(또는 제일 처음)만 호출하도록 하는 것
    */
-  yield take("LOGIN_REQUEST", login);
+  //   yield take("LOGIN_REQUEST", login);
+  //   yield takeEvery("LOGIN_REQUEST", login);
+  yield takeLatest("LOGIN_REQUEST", login);
+  //   yield throttle("LOGIN_REQUEST", login, 2000);
 }
 
 function logoutAPI() {
@@ -65,10 +101,14 @@ function logoutAPI() {
 
 function* logout() {
   try {
-    const result = yield call(logoutAPI);
+    // const result = yield call(logoutAPI);
+    /**
+     * 서버가 없으므로 delay를 통해 비동기 효과
+     */
+    yield delay(1000);
     yield put({
       type: "LOGOUT_SUCCESS",
-      data: result.data,
+      //   data: result.data,
     });
   } catch (err) {
     yield put({
@@ -79,7 +119,7 @@ function* logout() {
 }
 
 function* watchLogout() {
-  yield take("LOGOUT_REQUEST", logout);
+  yield takeLatest("LOGOUT_REQUEST", logout);
 }
 
 function addPostAPI(data) {
@@ -88,10 +128,11 @@ function addPostAPI(data) {
 
 function* addPost(action) {
   try {
-    const result = yield call(addPostAPI, action.data);
+    // const result = yield call(addPostAPI, action.data);
+    yield delay(1000);
     yield put({
       type: "ADD_POST_SUCCESS",
-      data: result.data,
+      //   data: result.data,
     });
   } catch (err) {
     yield put({
@@ -102,7 +143,7 @@ function* addPost(action) {
 }
 
 function* watchAddPost() {
-  yield take("ADD_POST_REQUEST", addPost);
+  yield takeLatest("ADD_POST_REQUEST", addPost);
 }
 
 export default function* rootSaga() {
