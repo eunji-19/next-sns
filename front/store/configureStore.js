@@ -29,9 +29,25 @@ import { composeWithDevTools } from "redux-devtools-extension";
  */
 
 import reducer from "../reducers/index";
+import thunkMiddleware from "redux-thunk";
+
+const loggerMiddleware =
+  ({ dispatch, getState }) =>
+  (next) =>
+  (action) => {
+    console.log("action ", action);
+    return next(action);
+  };
 
 const configureStore = () => {
-  const middlewares = [];
+  /**
+   * Middleware
+   * - redux 능력 향상
+   * - redux-thunk : Redux가 비동기 기능을 할 수 있게 해줌
+   * - 항상 3단 고차함수
+   * ex) const loggerMiddleware = ({dispatch, getState}) => (next) => (action) => {return next(action);};
+   */
+  const middlewares = [thunkMiddleware, loggerMiddleware];
   const enhancer =
     process.env.NODE_ENV === "production"
       ? compose(applyMiddleware(...middlewares))
