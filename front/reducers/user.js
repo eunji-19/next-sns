@@ -1,3 +1,5 @@
+import produce from "immer";
+
 export const initialState = {
   loginLoading: false, // 로그인 시도중 (로딩)
   loginDone: false,
@@ -78,114 +80,96 @@ const dummyUser = (data) => ({
  * saga와 맞춤
  */
 const reducer = (state = initialState, action) => {
-  switch (action.type) {
-    case LOGIN_REQUEST:
-      return {
-        ...state,
-        loginLoading: true,
-        loginError: null,
-        loginDone: false,
-      };
-    case LOGIN_SUCCESS:
-      return {
-        ...state,
-        loginLoading: false,
-        loginDone: true,
-        loginError: null,
-        me: dummyUser(action.data),
-      };
-    case LOGIN_FAILURE:
-      return {
-        ...state,
-        loginLoading: false,
-        loginDone: false,
-        loginError: action.error,
-      };
-    case LOGOUT_REQUEST:
-      return {
-        ...state,
-        logoutLoading: true,
-        logoutDone: false,
-        logoutError: null,
-      };
-    case LOGOUT_SUCCESS:
-      return {
-        ...state,
-        logoutLoading: false,
-        logoutDone: true,
-        // loginDone: false,
-        logoutError: null,
-        me: null,
-      };
-    case LOGOUT_FAILURE:
-      return {
-        ...state,
-        logoutLoading: false,
-        logoutDone: false,
-        logoutError: action.error,
-      };
-    case SIGNUP_REQUEST:
-      return {
-        ...state,
-        signupLoading: true,
-        signupDone: false,
-        signupError: null,
-      };
-    case SIGNUP_SUCCESS:
-      return {
-        ...state,
-        signupLoading: false,
-        signupDone: true,
-        signupData: action.data,
-      };
-    case SIGNUP_FAILURE:
-      return {
-        ...state,
-        signupLoading: false,
-        signupDone: false,
-        signupError: action.error,
-      };
-    case CHANGE_NICKNAME_REQUEST:
-      return {
-        ...state,
-        changeNicknameLoading: true,
-        changeNicknameDone: false,
-        changeNicknameError: null,
-      };
-    case CHANGE_NICKNAME_SUCCESS:
-      return {
-        ...state,
-        changeNicknameLoading: false,
-        changeNicknameDone: true,
-        changeNicknameData: action.data,
-      };
-    case CHANGE_NICKNAME_FAILURE:
-      return {
-        ...state,
-        changeNicknameLoading: false,
-        changeNicknameDone: false,
-        changeNicknameError: action.error,
-      };
-    case ADD_POST_TO_ME:
-      return {
-        ...state,
-        me: {
-          ...state.me,
-          Posts: [{ id: action.data }, ...state.me.Posts],
-        },
-      };
-    case REMOVE_POST_FROM_ME:
-      // action.data === id
-      return {
-        ...state,
-        me: {
-          ...state.me,
-          Posts: state.me.Posts.filter((value) => value !== action.data),
-        },
-      };
-    default:
-      return state;
-  }
+  return produce(state, (draft) => {
+    switch (action.type) {
+      case LOGIN_REQUEST:
+        draft.loginLoading = true;
+        draft.loginDone = false;
+        draft.loginError = null;
+        break;
+      case LOGIN_SUCCESS:
+        draft.loginLoading = false;
+        draft.loginDone = true;
+        draft.loginError = null;
+        draft.me = dummyUser(action.data);
+        break;
+      case LOGIN_FAILURE:
+        draft.loginLoading = false;
+        draft.loginDone = false;
+        draft.loginError = action.error;
+        break;
+      case LOGOUT_REQUEST:
+        draft.logoutLoading = true;
+        draft.logoutDone = false;
+        draft.logoutError = null;
+        break;
+      case LOGOUT_SUCCESS:
+        draft.logoutLoading = false;
+        draft.logoutDone = false;
+        draft.logoutError = null;
+        draft.me = null;
+        break;
+      case LOGOUT_FAILURE:
+        draft.logoutLoading = false;
+        draft.logoutError = action.error;
+        break;
+      case SIGNUP_REQUEST:
+        draft.signupLoading = true;
+        draft.signupDone = false;
+        draft.signupError = null;
+        break;
+      case SIGNUP_SUCCESS:
+        draft.signupLoading = false;
+        draft.signupDone = true;
+        draft.signupError = null;
+        draft.signupData = action.data;
+        break;
+      case SIGNUP_FAILURE:
+        draft.signupLoading = false;
+        draft.signupError = action.error;
+        break;
+      case CHANGE_NICKNAME_REQUEST:
+        draft.changeNicknameLoading = true;
+        draft.changeNicknameDone = false;
+        draft.changeNicknameError = null;
+        break;
+      case CHANGE_NICKNAME_SUCCESS:
+        draft.changeNicknameLoading = false;
+        draft.changeNicknameDone = true;
+        draft.changeNicknameError = null;
+        draft.changeNicknameData = action.data;
+        break;
+      case CHANGE_NICKNAME_FAILURE:
+        draft.changeNicknameLoading = false;
+        draft.changeNicknameError = action.error;
+        break;
+      case ADD_POST_TO_ME:
+        draft.me.Posts.unshift({ id: action.data });
+        break;
+      // return {
+      //   ...state,
+      //   me: {
+      //     ...state.me,
+      //     Posts: [{ id: action.data }, ...state.me.Posts],
+      //   },
+      // };
+      case REMOVE_POST_FROM_ME:
+        // action.data === id
+        draft.me.Posts = draft.me.Posts.filter(
+          (value) => value !== action.data
+        );
+        break;
+      // return {
+      //   ...state,
+      //   me: {
+      //     ...state.me,
+      //     Posts: state.me.Posts.filter((value) => value !== action.data),
+      //   },
+      // };
+      default:
+        break;
+    }
+  });
 };
 
 export default reducer;
