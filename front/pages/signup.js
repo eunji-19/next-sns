@@ -1,5 +1,6 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Head from "next/head";
+import Router from "next/router";
 import AppLayout from "../components/AppLayout";
 import { Button, Checkbox, Form, Input } from "antd";
 import useInput from "../hooks/useInput";
@@ -13,7 +14,35 @@ const ErrorMessage = styled.div`
 
 const Signup = () => {
   const dispatch = useDispatch();
-  const { signupLoading } = useSelector((state) => state.user);
+  const { signupLoading, signupDone, signupError } = useSelector(
+    (state) => state.user
+  );
+  const { me } = useSelector((state) => state.user);
+
+  useEffect(() => {
+    if (!(me && me.id)) {
+      Router.replace("/");
+    }
+  }, [me && me.id]);
+
+  if (!me) {
+    return null;
+  }
+
+  /**
+   * 회원가입 완료되면 -> 메인페이지로 이동
+   */
+  useEffect(() => {
+    if (signupDone) {
+      Router.replace("/");
+    }
+  }, [signupDone]);
+
+  useEffect(() => {
+    if (signupError) {
+      alert(signupError);
+    }
+  }, [signupError]);
 
   const [email, onChangeEmail] = useInput("");
   const [password, onChangePassword] = useInput("");
@@ -48,8 +77,16 @@ const Signup = () => {
       return setTermError(true);
     }
     console.log(email, password, nickname);
+
+    /**
+     * 회원가입 Saga
+     */
+    // dispatch({
+    //   type: SIGNUP_REQUEST,
+    //   data: { email, password, nickname },
+    // });
     dispatch(signupRequestAction({ email, password, nickname }));
-  }, [password, passwordCheck, term]);
+  }, [email, password, passwordCheck, term]);
 
   return (
     <AppLayout>

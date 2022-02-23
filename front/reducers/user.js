@@ -97,7 +97,8 @@ const reducer = (state = initialState, action) => {
         draft.loginLoading = false;
         draft.loginDone = true;
         draft.loginError = null;
-        draft.me = dummyUser(action.data);
+        draft.me = action.data;
+        // draft.me = dummyUser(action.data);
         break;
       case LOGIN_FAILURE:
         draft.loginLoading = false;
@@ -181,7 +182,7 @@ const reducer = (state = initialState, action) => {
         draft.followLoading = false;
         draft.followDone = true;
         draft.followError = null;
-        draft.me.Followings.push({ id: action.data });
+        draft.me.Following.push({ id: action.data });
         break;
       case FOLLOW_FAILURE:
         draft.followLoading = false;
@@ -197,7 +198,7 @@ const reducer = (state = initialState, action) => {
         draft.unfollowLoading = false;
         draft.unfollowDone = true;
         draft.unfollowError = null;
-        draft.me.Followings = draft.me.Followings.filter(
+        draft.me.Following = draft.me.Following.filter(
           (value) => value.id !== action.data
         );
         break;
