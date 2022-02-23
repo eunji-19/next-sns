@@ -146,7 +146,8 @@ const reducer = (state = initialState, action) => {
         draft.addPostLoading = false;
         draft.addPostDone = true;
         draft.addPostError = null;
-        draft.mainPosts.unshift(dummyPost(action.data));
+        draft.mainPosts.unshift(action.data);
+        // draft.mainPosts.unshift(dummyPost(action.data));
         // draft.mainPosts = [dummyPost(action.data), ...state.mainPosts];
         break;
       case ADD_POST_FAILURE:
@@ -185,9 +186,9 @@ const reducer = (state = initialState, action) => {
         // const mainPosts = [...state.mainPosts];
         // mainPosts[postIndex] = { ...post, Comments };
         const post = draft.mainPosts.find(
-          (value) => value.id === action.data.postId
+          (value) => value.id === action.data.PostId
         );
-        post.Comments.unshift(dummyComment(action.data.content));
+        post.Comments.unshift(action.data);
         draft.addCommentLoading = false;
         draft.addCommentDone = true;
         draft.addCommentError = null;
