@@ -2,6 +2,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const express = require("express");
 const db = require("./models");
+const path = require("path");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
@@ -58,6 +59,7 @@ app.use(
     credentials: true,
   })
 );
+app.use("/", express.static(path.join(__dirname, "uploads")));
 app.use(express.json()); // front에서 json 형태로 데이터 보내주면 req.body에 json 형태로 데이터 넣어줌
 app.use(express.urlencoded({ extended: true })); // form-submit 했을때 urlencoded 방식으로 처리해줌
 app.use(cookieParser(process.env.COOKIE_SECRET));

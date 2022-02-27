@@ -25,12 +25,15 @@ export const initialState = {
   addCommentLoading: false, // 댓글 추가가 완료 됐을 때
   addCommentDone: false,
   addCommentError: null,
-  likePostLoading: false, // 댓글 추가가 완료 됐을 때
+  likePostLoading: false, // 좋아요
   likePostDone: false,
   likePostError: null,
-  unlikePostLoading: false, // 댓글 추가가 완료 됐을 때
+  unlikePostLoading: false, // 좋아요 취소
   unlikePostDone: false,
   unlikePostError: null,
+  uploadImagesLoading: false, // 이미지 업로드
+  uploadImagesDone: false,
+  uploadImagesError: null,
 };
 
 export const generateDummyPost = (number) =>
@@ -90,6 +93,12 @@ export const UNLIKE_POST_REQUEST = "UNLIKE_POST_REQUEST";
 export const UNLIKE_POST_SUCCESS = "UNLIKE_POST_SUCCESS";
 export const UNLIKE_POST_FAILURE = "UNLIKE_POST_FAILURE";
 
+export const LPLOAD_IMAGES_REQUEST = "LPLOAD_IMAGES_REQUEST";
+export const LPLOAD_IMAGES_SUCCESS = "LPLOAD_IMAGES_SUCCESS";
+export const LPLOAD_IMAGES_FAILURE = "LPLOAD_IMAGES_FAILURE";
+
+export const REMOVE_IMAGE = "REMOVE_IMAGE";
+
 export const addPost = (data) => ({
   type: ADD_POST_REQUEST,
   data,
@@ -134,6 +143,27 @@ const reducer = (state = initialState, action) => {
    */
   return produce(state, (draft) => {
     switch (action.type) {
+      case REMOVE_IMAGE:
+        draft.imagePaths = draft.imagePaths.filter(
+          (value, index) => index !== action.data
+        );
+        break;
+      case LPLOAD_IMAGES_REQUEST:
+        draft.uploadImagesLoading = true;
+        draft.uploadImagesDone = false;
+        draft.uploadImagesError = null;
+        break;
+      case LPLOAD_IMAGES_SUCCESS: {
+        draft.imagePaths = action.data; // 서버에서 파일명을 보내줌
+        draft.uploadImagesLoading = false;
+        draft.uploadImagesDone = true;
+        draft.uploadImagesError = null;
+        break;
+      }
+      case LPLOAD_IMAGES_FAILURE:
+        draft.uploadImagesLoading = false;
+        draft.uploadImagesError = action.error;
+        break;
       case LIKE_POST_REQUEST:
         draft.likePostLoading = true;
         draft.likePostDone = false;
@@ -201,6 +231,7 @@ const reducer = (state = initialState, action) => {
         draft.addPostDone = true;
         draft.addPostError = null;
         draft.mainPosts.unshift(action.data);
+        draft.imagePaths = [];
         // draft.mainPosts.unshift(dummyPost(action.data));
         // draft.mainPosts = [dummyPost(action.data), ...state.mainPosts];
         break;

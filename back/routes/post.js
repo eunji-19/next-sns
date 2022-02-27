@@ -1,13 +1,36 @@
 const express = require("express");
 const { Post, Comment, Image, Hashtag, User } = require("../models");
-const comment = require("../models/comment");
 const { isLoggedIn } = require("./middlewares");
+const path = require("path");
+const multer = require("multer");
+const fs = require("fs");
 const router = express.Router();
+
+try {
+  fs.accessSync("uploads");
+} catch (err) {
+  console.log("uploads 폴더가 없으므로 생성합니다.");
+  fs.mkdirSync("uploads");
+}
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination(req, file, done) {
+      done(null, "uploads");
+    },
+    filename(req, file, done) {
+      const ext = path.extname(file.originalname); // 확장자 추출(png)
+      const baseName = path.basename(file.originalname, ext); // fileName
+      done(null, baseName + "_" + new Date().getTime() + ext);
+    },
+  }),
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
+});
 
 /**
  * 게시글 추가하기
  */
-router.post("/add", isLoggedIn, async (req, res, next) => {
+router.post("/add", isLoggedIn, upload.none(), async (req, res, next) => {
   try {
     /**
      * 새로운 게시글 생성
@@ -16,6 +39,35 @@ router.post("/add", isLoggedIn, async (req, res, next) => {
       content: req.body.content,
       UserId: req.user.id,
     });
+
+    /**
+     * 해시태그를 게시글에서 뽑아내기
+     */
+    const hashtags = req.body.content.match(/#[^\s#]+/g);
+    if (hashtags) {
+      const result = await Promise.all(
+        hashtags.map((tag) =>
+          Hashtag.findOrCreate({ where: { name: tag.slice(1).toLowerCase() } })
+        )
+      );
+      // [[노드, true], [리액트, true]] => [[노드], [리액트]]
+      await newPost.addHashtags(result.map((v) => v[0]));
+    }
+
+    if (req.body.image) {
+      if (Array.isArray(req.body.image)) {
+        // 이미지를 여러개 올리면 image: [test1.png, test2.png ]
+        // DB에는 이미지 주소만 올라감
+        const images = await Promise.all(
+          req.body.image.map((item) => Image.create({ src: item }))
+        );
+        await newPost.addImages(images);
+      } else {
+        // 이미지를 한개만 올리면 image: test1.png
+        const image = await Image.create({ src: req.body.image });
+        await newPost.addImages(image);
+      }
+    }
 
     /**
      * 새로운 게시글 생성 후 해당 id 를 통해
@@ -156,5 +208,27 @@ router.delete("/:postId", isLoggedIn, async (req, res, next) => {
     next(err);
   }
 });
+
+/**
+ * 이미지 업로드
+ * - npm i multer
+ * - 이미지 여러개 upload.array("image") -> frontend input의 name 속성(image)
+ * - 이미지 한개 upload.single("image ")
+ * - 텍스트만 가져감 upload.none()
+ */
+router.post(
+  "/images",
+  isLoggedIn,
+  upload.array("image"),
+  async (req, res, next) => {
+    try {
+      console.log(req.files);
+      res.json(req.files.map((value) => value.filename));
+    } catch (err) {
+      console.error(err);
+      next(err);
+    }
+  }
+);
 
 module.exports = router;

@@ -21,6 +21,9 @@ import {
   LOAD_POST_FAILURE,
   LOAD_POST_REQUEST,
   LOAD_POST_SUCCESS,
+  LPLOAD_IMAGES_FAILURE,
+  LPLOAD_IMAGES_REQUEST,
+  LPLOAD_IMAGES_SUCCESS,
   REMOVE_POST_FAILURE,
   REMOVE_POST_REQUEST,
   REMOVE_POST_SUCCESS,
@@ -60,13 +63,15 @@ function* watchLoadPost() {
  * withCredentials -> cookie 보냄
  */
 function addPostAPI(data) {
-  return axios.post(
-    "/post/add",
-    { content: data }
-    // {
-    //   withCredentials: true,
-    // }
-  );
+  // formData는 바로 data로 넣어줘야 함
+  return axios.post("/post/add", data);
+  // return axios.post(
+  //   "/post/add",
+  //   { content: data }
+  //   // {
+  //   //   withCredentials: true,
+  //   // }
+  // );
 }
 
 function* addPost(action) {
@@ -212,6 +217,30 @@ function* watchUnlikePost() {
   yield takeLatest(UNLIKE_POST_REQUEST, unlikePost);
 }
 
+function uploadImagesAPI(data) {
+  return axios.post("/post/images", data);
+}
+
+function* uploadImages(action) {
+  try {
+    const result = yield call(uploadImagesAPI, action.data);
+    yield put({
+      type: LPLOAD_IMAGES_SUCCESS,
+      data: result.data,
+    });
+  } catch (err) {
+    console.error(err);
+    yield put({
+      type: LPLOAD_IMAGES_FAILURE,
+      error: err.response.data,
+    });
+  }
+}
+
+function* watchUploadImages() {
+  yield takeLatest(LPLOAD_IMAGES_REQUEST, uploadImages);
+}
+
 export default function* postSaga() {
   yield all([
     fork(watchLoadPost),
@@ -220,5 +249,6 @@ export default function* postSaga() {
     fork(watchCommentPost),
     fork(watchLikePost),
     fork(watchUnlikePost),
+    fork(watchUploadImages),
   ]);
 }
