@@ -13,7 +13,7 @@ const Home = () => {
    * : <AppLayout>하위의 모든 것들</AppLayout>
    */
   const { me } = useSelector((state) => state.user);
-  const { mainPosts, hasMorePost, loadPostLoading } = useSelector(
+  const { mainPosts, hasMorePost, loadPostLoading, retweetError } = useSelector(
     (state) => state.post
   );
 
@@ -32,6 +32,12 @@ const Home = () => {
     });
   }, []);
 
+  useEffect(() => {
+    if (retweetError) {
+      alert(retweetError);
+    }
+  }, [retweetError]);
+
   /**
    * 무한 스크롤 -> Request 2번 가는 문제 해결
    */
@@ -46,15 +52,26 @@ const Home = () => {
   //     });
   //   }
   // }, [inView, hasMorePost, loadPostLoading, mainPosts]);
-  // useEffect(() => {
-  //   if (inView && hasMorePost && !loadPostLoading) {
-  //     const lastId = mainPosts[mainPosts.length - 1]?.id;
-  //     dispatch({
-  //       type: LOAD_POST_REQUEST,
-  //       lastId,
-  //     });
-  //   }
-  // }, [inView, mainPosts]);
+  useEffect(() => {
+    function onScroll() {
+      if (
+        window.pageYOffset + document.documentElement.clientHeight >
+        document.documentElement.scrollHeight - 300
+      ) {
+        if (hasMorePost && !loadPostLoading) {
+          const lastId = mainPosts[mainPosts.length - 1]?.id;
+          dispatch({
+            type: LOAD_POST_REQUEST,
+            lastId,
+          });
+        }
+      }
+    }
+    window.addEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [hasMorePost, loadPostLoading, mainPosts]);
 
   /**
    * Infinite Scroll

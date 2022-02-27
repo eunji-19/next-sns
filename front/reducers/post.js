@@ -34,6 +34,9 @@ export const initialState = {
   uploadImagesLoading: false, // 이미지 업로드
   uploadImagesDone: false,
   uploadImagesError: null,
+  retweetLoading: false, // 리트윗
+  retweetDone: false,
+  retweetError: null,
 };
 
 export const generateDummyPost = (number) =>
@@ -99,6 +102,10 @@ export const LPLOAD_IMAGES_FAILURE = "LPLOAD_IMAGES_FAILURE";
 
 export const REMOVE_IMAGE = "REMOVE_IMAGE";
 
+export const RETWEET_REQUEST = "RETWEET_REQUEST";
+export const RETWEET_SUCCESS = "RETWEET_SUCCESS";
+export const RETWEET_FAILURE = "RETWEET_FAILURE";
+
 export const addPost = (data) => ({
   type: ADD_POST_REQUEST,
   data,
@@ -143,6 +150,22 @@ const reducer = (state = initialState, action) => {
    */
   return produce(state, (draft) => {
     switch (action.type) {
+      case RETWEET_REQUEST:
+        draft.retweetLoading = true;
+        draft.retweetDone = false;
+        draft.retweetError = null;
+        break;
+      case RETWEET_SUCCESS: {
+        draft.retweetLoading = false;
+        draft.retweetDone = true;
+        draft.retweetError = null;
+        draft.mainPosts.unshift(action.data);
+        break;
+      }
+      case RETWEET_FAILURE:
+        draft.retweetLoading = false;
+        draft.retweetError = action.error;
+        break;
       case REMOVE_IMAGE:
         draft.imagePaths = draft.imagePaths.filter(
           (value, index) => index !== action.data
@@ -214,8 +237,9 @@ const reducer = (state = initialState, action) => {
         draft.loadPostDone = true;
         draft.loadPostError = null;
         // draft.mainPosts.unshift(dummyPost(action.data));
-        draft.mainPosts = action.data.concat(draft.mainPosts);
-        draft.hasMorePost = draft.mainPosts.length < 50;
+        // draft.mainPosts = action.data.concat(draft.mainPosts);
+        draft.mainPosts = draft.mainPosts.concat(action.data);
+        draft.hasMorePost = draft.mainPosts.length === 10;
         break;
       case LOAD_POST_FAILURE:
         draft.loadPostLoading = false;
