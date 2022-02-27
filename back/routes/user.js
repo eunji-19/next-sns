@@ -6,6 +6,46 @@ const { User, Post } = require("../models"); // 구조분해 할당 (db.User -> 
 const router = express.Router();
 
 /**
+ * 로그인 유지
+ */
+router.get("/login", async (req, res, next) => {
+  try {
+    console.log("user id ", req.user);
+    if (req.user) {
+      const fullUserWithoutPassword = await User.findOne({
+        where: { id: req.user.id },
+        // attributes: ["id", "email", "nickname"],
+        attributes: {
+          exclude: ["password"],
+        },
+        include: [
+          {
+            model: Post,
+            attributes: ["id"],
+          },
+          {
+            model: User,
+            as: "Following",
+            attributes: ["id"],
+          },
+          {
+            model: User,
+            as: "Followers",
+            attributes: ["id"],
+          },
+        ],
+      });
+      res.status(200).json(fullUserWithoutPassword);
+    } else {
+      res.status(200).json(null);
+    }
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+});
+
+/**
  * 로그인
  * - npm i passport, passport-local
  */
@@ -113,6 +153,126 @@ router.post("/signup", isNotLoggedIn, async (req, res, next) => {
   } catch (error) {
     console.error(error);
     next(error); // status(500)
+  }
+});
+
+/**
+ * 닉네임 수정하기
+ */
+router.patch("/nickname", isLoggedIn, async (req, res, next) => {
+  try {
+    await User.update(
+      {
+        nickname: req.body.nickname,
+      },
+      {
+        where: { id: req.user.id },
+      }
+    );
+    res.status(200).json({ nickname: req.body.nickname });
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+});
+
+/**
+ * 팔로우하기
+ */
+router.patch("/:userId/follow", isLoggedIn, async (req, res, next) => {
+  try {
+    const findUser = await User.findOne({
+      where: { id: req.params.userId },
+    });
+    if (!findUser) {
+      return res.status(403).send("해당 사용자가 없습니다");
+    }
+
+    await findUser.addFollowers(req.user.id);
+    res.status(200).json({ UserId: parseInt(req.params.userId, 10) });
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+});
+
+/**
+ * 팔로우 취소하기
+ */
+router.delete("/:userId/follow", isLoggedIn, async (req, res, next) => {
+  try {
+    const findUser = await User.findOne({
+      where: { id: req.params.userId },
+    });
+    if (!findUser) {
+      return res.status(403).send("해당 사용자가 없습니다");
+    }
+
+    await findUser.removeFollowers(req.user.id);
+    res.status(200).json({ UserId: parseInt(req.params.userId, 10) });
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+});
+
+/**
+ * 팔로잉, 팔로우 목록 불러오기
+ */
+router.get("/followers", isLoggedIn, async (req, res, next) => {
+  try {
+    const findUser = await User.findOne({
+      where: { id: req.user.id },
+    });
+    if (!findUser) {
+      return res.status(403).send("해당 사용자가 없습니다");
+    }
+
+    const followers = await findUser.getFollowers();
+    res.status(200).json(followers);
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+});
+
+router.get("/followings", isLoggedIn, async (req, res, next) => {
+  try {
+    const findUser = await User.findOne({
+      where: { id: req.user.id },
+    });
+    if (!findUser) {
+      return res.status(403).send("해당 사용자가 없습니다");
+    }
+
+    const followings = await findUser.getFollowing();
+    res.status(200).json(followings);
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+});
+
+/**
+ * 팔로워 차단
+ */
+router.delete("/follower/:userId", isLoggedIn, async (req, res, next) => {
+  try {
+    /**
+     * 존재 하는 사용자인지 확인
+     */
+    const findUser = await User.findOne({
+      where: { id: req.params.userId },
+    });
+    if (!findUser) {
+      return res.status(403).send("해당 사용자가 없습니다");
+    }
+
+    await findUser.removeFollowing(req.user.id);
+    res.status(200).json({ UserId: parseInt(req.params.userId, 10) });
+  } catch (err) {
+    console.error(err);
+    next(err);
   }
 });
 
