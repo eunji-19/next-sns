@@ -20,15 +20,23 @@ module.exports = (sequelize, DataTypes) => {
     // 1개의 해시태그 -> 여러개의 게시글
     // 1개의 게시글 -> 여러개의 해시태그 => 다대다 관계
     // 게시글 작성자
+    // belongsTo -> 단수
+    // post.addUser(), post.getUser(), post.setUser()(set -> 수정)
     db.Post.belongsTo(db.User);
+    // post.addComments(), post.getComments()
     db.Post.hasMany(db.Comment);
+    // hasMany 복수 -> Images로 생성됨
+    // post.addImages(), post.getImages()
     db.Post.hasMany(db.Image);
+    // post.addHashtags()
     db.Post.belongsToMany(db.Hashtag, { through: "PostHashtag" });
     // db.Post.belongsTo(db.User)와 헷갈리지 않도록 as 를 통해서 설정
     // 나중에 as에 따라서 post.getLikers() 처럼 게시글 좋아요 누른 사람을 가져옴
+    // post.addLikers(), post.removeLikers()
     db.Post.belongsToMany(db.User, { through: "Like", as: "Likers" }); // 좋아요
     // ReTweet -> 어떤 게시글이 어떤 게시글의 리트윗
     // as: Retweet -> postId에서 RetweetId로 변경됨
+    // post.addRetweet()
     db.Post.belongsTo(db.Post, { as: "Retweet" });
   };
 

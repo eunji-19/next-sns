@@ -7,6 +7,7 @@ const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const passportConfig = require("./passport");
 const cors = require("cors");
+const morgan = require("morgan");
 const app = express();
 
 /**
@@ -14,6 +15,7 @@ const app = express();
  */
 const userRouter = require("./routes/user");
 const postRouter = require("./routes/post");
+const postsRouter = require("./routes/posts");
 
 const PORT = 4000;
 
@@ -31,6 +33,11 @@ db.sequelize
   .catch(console.error);
 
 /**
+ * morgan 설정
+ */
+app.use(morgan("dev"));
+
+/**
  * passport 설정
  */
 passportConfig();
@@ -43,9 +50,12 @@ passportConfig();
 app.use(
   cors({
     // true -> 보낸 곳의 주소가 자동으로 들어감
-    origin: true,
     // origin: "*"
-    credentials: false,
+    // credentials - cookie도 함께 전달
+    // Access-control-origin
+    // Access-control-credentials
+    origin: true,
+    credentials: true,
   })
 );
 app.use(express.json()); // front에서 json 형태로 데이터 보내주면 req.body에 json 형태로 데이터 넣어줌
@@ -63,6 +73,7 @@ app.use(passport.session());
 
 app.use("/user", userRouter);
 app.use("/post", postRouter);
+app.use("/posts", postsRouter);
 
 /**
  * 에러 처리 미들웨어
