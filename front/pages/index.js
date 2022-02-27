@@ -5,6 +5,7 @@ import PostCard from "../components/PostCard";
 import PostForm from "../components/PostForm";
 import { LOAD_POST_REQUEST } from "../reducers/post";
 import { useInView } from "react-intersection-observer";
+import { LOAD_USER_REQUEST } from "../reducers/user";
 
 const Home = () => {
   /**
@@ -18,7 +19,14 @@ const Home = () => {
 
   const dispatch = useDispatch();
 
+  /**
+   * 로그인 여부
+   * 게시글 불러오기
+   */
   useEffect(() => {
+    dispatch({
+      type: LOAD_USER_REQUEST,
+    });
     dispatch({
       type: LOAD_POST_REQUEST,
     });
@@ -29,15 +37,24 @@ const Home = () => {
    */
   const [ref, inView] = useInView();
 
-  useEffect(() => {
-    if (inView && hasMorePost && !loadPostLoading) {
-      const lastId = mainPosts[mainPosts.length - 1]?.id;
-      dispatch({
-        type: LOAD_POST_REQUEST,
-        lastId,
-      });
-    }
-  }, [inView, hasMorePost, loadPostLoading, mainPosts]);
+  // useEffect(() => {
+  //   if (inView && hasMorePost && !loadPostLoading) {
+  //     const lastId = mainPosts[mainPosts.length - 1]?.id;
+  //     dispatch({
+  //       type: LOAD_POST_REQUEST,
+  //       lastId,
+  //     });
+  //   }
+  // }, [inView, hasMorePost, loadPostLoading, mainPosts]);
+  // useEffect(() => {
+  //   if (inView && hasMorePost && !loadPostLoading) {
+  //     const lastId = mainPosts[mainPosts.length - 1]?.id;
+  //     dispatch({
+  //       type: LOAD_POST_REQUEST,
+  //       lastId,
+  //     });
+  //   }
+  // }, [inView, mainPosts]);
 
   /**
    * Infinite Scroll

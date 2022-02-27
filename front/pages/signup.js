@@ -20,14 +20,14 @@ const Signup = () => {
   const { me } = useSelector((state) => state.user);
 
   useEffect(() => {
-    if (!(me && me.id)) {
+    if (me && me.id) {
       Router.replace("/");
     }
   }, [me && me.id]);
 
-  if (!me) {
-    return null;
-  }
+  // if (me) {
+  //   return null;
+  // }
 
   /**
    * 회원가입 완료되면 -> 메인페이지로 이동
