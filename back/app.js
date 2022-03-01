@@ -21,8 +21,8 @@ const postRouter = require("./routes/post");
 const postsRouter = require("./routes/posts");
 const hashtagRouter = require("./routes/hashtag");
 
-// const PORT = 4000;
-const PORT = 80;
+const PORT = 4000;
+// const PORT = 80;
 
 /**
  * MySQL & Sequelize 셋팅
