@@ -43,9 +43,9 @@ const User = () => {
     };
   }, [mainPosts.length, hasMorePosts, id]);
 
-  if (router.isFallback) {
-    return <div>로딩중...</div>;
-  }
+  //   if (router.isFallback) {
+  //     return <div>로딩중...</div>;
+  //   }
 
   return (
     <AppLayout>
@@ -121,45 +121,70 @@ const User = () => {
  * : false -> 없는 페이지 에러 뜸
  * : true -> 없는 페이지 에러 안뜸
  */
-export async function getStaticPaths() {
-  //   const result = await axios.get("/post/list");
-  return {
-    paths: [
-      {
-        params: { id: "1" },
-      },
-      {
-        params: { id: "2" },
-      },
-      {
-        params: { id: "3" },
-      },
-    ],
-    fallback: true,
-  };
-}
+// export async function getStaticPaths() {
+//   //   const result = await axios.get("/post/list");
+//   return {
+//     paths: [
+//       {
+//         params: { id: "1" },
+//       },
+//       {
+//         params: { id: "2" },
+//       },
+//       {
+//         params: { id: "3" },
+//       },
+//     ],
+//     fallback: true,
+//   };
+// }
 
-export const getStaticProps = wrapper.getStaticProps(async (context) => {
-  const cookie = context.req ? context.req.headers.cookie : "";
-  axios.defaults.headers.Cookie = "";
-  if (context.req && cookie) {
-    axios.defaults.headers.Cookie = cookie;
+// export const getStaticProps = wrapper.getStaticProps(async (context) => {
+//   const cookie = context.req ? context.req.headers.cookie : "";
+//   axios.defaults.headers.Cookie = "";
+//   if (context.req && cookie) {
+//     axios.defaults.headers.Cookie = cookie;
+//   }
+//   context.store.dispatch({
+//     type: LOAD_USER_POSTS_REQUEST,
+//     data: context.params.id,
+//   });
+//   context.store.dispatch({
+//     type: LOAD_MY_INFO_REQUEST,
+//   });
+//   context.store.dispatch({
+//     type: LOAD_USER_REQUEST,
+//     data: context.params.id,
+//   });
+//   context.store.dispatch(END);
+//   await context.store.sagaTask.toPromise();
+//   console.log("getState", context.store.getState().post.mainPosts);
+//   return { props: {} };
+// });
+
+export const getServerSideProps = wrapper.getServerSideProps(
+  async (context) => {
+    const cookie = context.req ? context.req.headers.cookie : "";
+    axios.defaults.headers.Cookie = "";
+    if (context.req && cookie) {
+      axios.defaults.headers.Cookie = cookie;
+    }
+    context.store.dispatch({
+      type: LOAD_USER_POSTS_REQUEST,
+      data: context.params.id,
+    });
+    context.store.dispatch({
+      type: LOAD_MY_INFO_REQUEST,
+    });
+    context.store.dispatch({
+      type: LOAD_USER_REQUEST,
+      data: context.params.id,
+    });
+    context.store.dispatch(END);
+    await context.store.sagaTask.toPromise();
+    console.log("getState", context.store.getState().post.mainPosts);
+    return { props: {} };
   }
-  context.store.dispatch({
-    type: LOAD_USER_POSTS_REQUEST,
-    data: context.params.id,
-  });
-  context.store.dispatch({
-    type: LOAD_MY_INFO_REQUEST,
-  });
-  context.store.dispatch({
-    type: LOAD_USER_REQUEST,
-    data: context.params.id,
-  });
-  context.store.dispatch(END);
-  await context.store.sagaTask.toPromise();
-  console.log("getState", context.store.getState().post.mainPosts);
-  return { props: {} };
-});
+);
 
 export default User;

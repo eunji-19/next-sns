@@ -325,7 +325,7 @@ function* loadFollowers() {
       data: result.data,
     });
   } catch (err) {
-    console.error(err);
+    console.error("error ", err);
     yield put({
       type: LOAD_FOLLOWERS_FAILURE,
       error: err.response.data,

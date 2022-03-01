@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Head from "next/head";
 import AppLayout from "../components/AppLayout";
 import NicknameEditForm from "../components/NicknameEditForm";
@@ -12,10 +12,37 @@ import {
 import wrapper from "../store/configureStore";
 import { END } from "redux-saga";
 import axios from "axios";
+import useSWR from "swr";
+
+const fetcher = (url) =>
+  axios.get(url, { withCredentials: true }).then((result) => {
+    return result.data;
+  });
 
 const Profile = () => {
   const { me } = useSelector((state) => state.user);
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
+
+  const [followersLimit, setFollowersLimit] = useState(3);
+
+  /**
+   * SWR 사용하기
+   * - fetcher
+   * : 주소를 실제 어떻게 가져올지 정하는 것
+   * - data
+   * : 성공
+   * - error
+   * : 에러
+   * - 둘다 없으면 로딩중
+   */
+  const { data: followersData, error: followerError } = useSWR(
+    `http://localhost:4000/user/followers?limit=${followersLimit}`,
+    fetcher
+  );
+  const { data: followingsData, error: followingError } = useSWR(
+    "http://localhost:4000/user/followings",
+    fetcher
+  );
 
   // useEffect(() => {
   //   dispatch({
@@ -32,8 +59,17 @@ const Profile = () => {
     }
   }, [me && me.id]);
 
+  const loadMoreFollowers = useCallback(() => {
+    setFollowersLimit((prev) => prev + 3);
+  }, []);
+
   if (!me) {
-    return null;
+    return "내 정보 로딩중...";
+  }
+
+  if (followerError || followingError) {
+    console.error(followerError || followingError);
+    return <div>팔로워/팔로잉 에러</div>;
   }
 
   return (
@@ -44,8 +80,15 @@ const Profile = () => {
       </Head>
       <AppLayout>
         <NicknameEditForm />
-        <FollowList header="팔로잉" data={me.Following} />
-        <FollowList header="팔로워" data={me.Followers} />
+        <FollowList header="팔로잉" data={followingsData} />
+        <FollowList
+          header="팔로워"
+          data={followersData}
+          onClickMore={loadMoreFollowers}
+          loading={!followersData && !followerError}
+        />
+        {/* <FollowList header="팔로잉" data={me.Following} />
+        <FollowList header="팔로워" data={me.Followers} /> */}
       </AppLayout>
     </>
   );
