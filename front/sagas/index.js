@@ -9,7 +9,8 @@ import axios from "axios";
 import postSaga from "./post";
 import userSaga from "./user";
 
-axios.defaults.baseURL = "http://localhost:4000";
+// axios.defaults.baseURL = "http://localhost:4000";
+axios.defaults.baseURL = "http://3.95.136.155:4000/";
 axios.defaults.withCredentials = true;
 
 export default function* rootSaga() {
