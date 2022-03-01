@@ -9,6 +9,8 @@ const passport = require("passport");
 const passportConfig = require("./passport");
 const cors = require("cors");
 const morgan = require("morgan");
+const hpp = require("hpp");
+const helmet = require("helmet");
 const app = express();
 
 /**
@@ -19,7 +21,8 @@ const postRouter = require("./routes/post");
 const postsRouter = require("./routes/posts");
 const hashtagRouter = require("./routes/hashtag");
 
-const PORT = 4000;
+// const PORT = 4000;
+const PORT = 80;
 
 /**
  * MySQL & Sequelize 셋팅
@@ -37,7 +40,13 @@ db.sequelize
 /**
  * morgan 설정
  */
-app.use(morgan("dev"));
+if (process.env.NODE_ENV === "production") {
+  app.use(morgan("combined"));
+  app.use(hpp());
+  app.use(helmet());
+} else {
+  app.use(morgan("dev"));
+}
 
 /**
  * passport 설정
@@ -56,7 +65,8 @@ app.use(
     // credentials - cookie도 함께 전달
     // Access-control-origin
     // Access-control-credentials
-    origin: true,
+    // origin: true,
+    origin: ["http://localhost:80", "eunji-nodebird.com"],
     credentials: true,
   })
 );
@@ -73,6 +83,10 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.get("/", (req, res) => {
+  res.send("Hello Express");
+});
 
 app.use("/user", userRouter);
 app.use("/post", postRouter);
