@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
-import Link from "next/Link";
+import Link from "next/link";
 import { Menu, Input, Row, Col } from "antd";
 import styled from "styled-components";
 // import "antd/dist/antd.css";
