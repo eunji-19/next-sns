@@ -16,7 +16,7 @@ import {
  */
 const ImagesZoom = ({ image, onClose }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const BACKEND_URL = "http://3.95.136.155:4000/";
+  const BACKEND_URL = "http://api/dmswlc19.com";
 
   return (
     <Overlay>

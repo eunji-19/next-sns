@@ -68,7 +68,7 @@ app.use(
     // origin: true,
     origin: [
       "http://localhost:80",
-      "eunji-nodebird.com",
+      "http://dmswlc19.com",
       "http://3.84.1.47:3100",
     ],
     credentials: true,
@@ -83,6 +83,11 @@ app.use(
     saveUninitialized: false,
     resave: false,
     secret: process.env.COOKIE_SECRET,
+    cookie: {
+      httpOnly: true,
+      secure: false,
+      domain: process.env.NODE_ENV === "production" && ".dmswlc19.com",
+    },
   })
 );
 app.use(passport.initialize());

@@ -12,7 +12,7 @@ const PostImages = ({ images }) => {
   const onClose = useCallback(() => {
     setShowImageZoom(false);
   }, []);
-  const BACKEND_URL = "http://3.95.136.155:4000/";
+  const BACKEND_URL = "http://api.dmswlc19.com";
 
   if (images.length === 1) {
     return (
