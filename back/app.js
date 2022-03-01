@@ -66,7 +66,11 @@ app.use(
     // Access-control-origin
     // Access-control-credentials
     // origin: true,
-    origin: ["http://localhost:80", "eunji-nodebird.com"],
+    origin: [
+      "http://localhost:80",
+      "eunji-nodebird.com",
+      "http://3.95.136.155:4000/",
+    ],
     credentials: true,
   })
 );
