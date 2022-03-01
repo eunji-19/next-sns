@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import { PlusOutlined } from "@ant-design/icons";
-import { BACKEND_URL } from "../../config/config";
 import ImagesZoom from "./ImagesZoom/index";
 
 const PostImages = ({ images }) => {
@@ -13,6 +12,7 @@ const PostImages = ({ images }) => {
   const onClose = useCallback(() => {
     setShowImageZoom(false);
   }, []);
+  const BACKEND_URL = "http://3.95.136.155:4000/";
 
   if (images.length === 1) {
     return (

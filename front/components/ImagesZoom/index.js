@@ -10,13 +10,13 @@ import {
   Indicator,
   Global,
 } from "./styles";
-import { BACKEND_URL } from "../../config/config";
 
 /**
  * npm i react-slick
  */
 const ImagesZoom = ({ image, onClose }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const BACKEND_URL = "http://3.95.136.155:4000/";
 
   return (
     <Overlay>
