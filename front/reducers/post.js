@@ -6,7 +6,8 @@
  * - User, Images, Comments : 다른 정보들과 합쳐서 줌 (대문자)
  */
 import shortId from "shortid";
-import produce from "immer";
+// import produce from "immer";
+import produce from "../util/produce";
 import faker from "@faker-js/faker";
 
 export const initialState = {

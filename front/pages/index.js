@@ -136,7 +136,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     const cookie = context.req ? context.req.headers.cookie : "";
     axios.defaults.headers.Cookie = "";
 
-    // 쿠키를 요청할때만 서버에 보내줌 !!엄청 중요함!!!!!
+    //
     if (context.req && cookie) {
       axios.defaults.headers.Cookie = cookie;
     }
@@ -150,6 +150,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     });
     context.store.dispatch(END);
     await context.store.sagaTask.toPromise();
+    // return {props: {data: 123}}
   }
 );
 
