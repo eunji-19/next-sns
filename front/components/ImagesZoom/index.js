@@ -10,6 +10,7 @@ import {
   Indicator,
   Global,
 } from "./styles";
+import { BACKEND_URL } from "../../config/config";
 
 /**
  * npm i react-slick
@@ -36,7 +37,7 @@ const ImagesZoom = ({ image, onClose }) => {
           >
             {image.map((item) => (
               <ImgWrapper key={item.src}>
-                <img src={`http://localhost:4000/${item.src}`} alt={item.src} />
+                <img src={`${BACKEND_URL}${item.src}`} alt={item.src} />
               </ImgWrapper>
             ))}
           </Slick>

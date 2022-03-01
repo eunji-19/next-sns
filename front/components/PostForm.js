@@ -8,6 +8,7 @@ import {
   REMOVE_IMAGE,
 } from "../reducers/post";
 import useInput from "../hooks/useInput";
+import { BACKEND_URL } from "../config/config";
 
 const PostForm = () => {
   const dispatch = useDispatch();
@@ -108,7 +109,7 @@ const PostForm = () => {
         {imagePaths.map((value, index) => (
           <div key={value} style={{ display: "inline-block" }}>
             <img
-              src={`http://localhost:4000/${value}`}
+              src={`${BACKEND_URL}${value}`}
               style={{ width: "200px" }}
               alt={value}
             />

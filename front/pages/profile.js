@@ -13,6 +13,7 @@ import wrapper from "../store/configureStore";
 import { END } from "redux-saga";
 import axios from "axios";
 import useSWR from "swr";
+import { BACKEND_URL } from "../config/config";
 
 const fetcher = (url) =>
   axios.get(url, { withCredentials: true }).then((result) => {
@@ -36,11 +37,11 @@ const Profile = () => {
    * - 둘다 없으면 로딩중
    */
   const { data: followersData, error: followerError } = useSWR(
-    `http://localhost:4000/user/followers?limit=${followersLimit}`,
+    `${BACKEND_URL}user/followers?limit=${followersLimit}`,
     fetcher
   );
   const { data: followingsData, error: followingError } = useSWR(
-    "http://localhost:4000/user/followings",
+    "${BACKEND_URL}user/followings",
     fetcher
   );
 
