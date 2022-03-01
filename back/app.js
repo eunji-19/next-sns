@@ -69,7 +69,7 @@ app.use(
     origin: [
       "http://localhost:80",
       "eunji-nodebird.com",
-      "http://3.95.136.155:4000/",
+      "http://3.84.1.47:3100/",
     ],
     credentials: true,
   })
