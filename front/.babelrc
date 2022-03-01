@@ -1,0 +1,18 @@
+/**
+ * CSS ServerSideRendering
+ * - ssr : 서버사이드렌더링 true
+ * - displayName: CSS ClassName을 알아볼 수 있게 만들어줌
+ * - npm i bable-plugin-styled-components
+ */
+{
+  "presets": ["next/babel"],
+  "plugins": [
+    [
+      "babel-plugin-styled-components",
+      {
+        "ssr": true,
+        "displayName": true
+      }
+    ]
+  ]
+}

@@ -6,7 +6,11 @@ import { Button, Checkbox, Form, Input } from "antd";
 import useInput from "../hooks/useInput";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
-import { signupRequestAction } from "../reducers/user";
+import { LOAD_MY_INFO_REQUEST, signupRequestAction } from "../reducers/user";
+import wrapper from "../store/configureStore";
+import axios from "axios";
+import { END } from "redux-saga";
+import { LOAD_POST_REQUEST } from "../reducers/post";
 
 const ErrorMessage = styled.div`
   color: red;
@@ -156,5 +160,29 @@ const Signup = () => {
     </AppLayout>
   );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps(
+  async (context) => {
+    // console.log("context : ", context);
+    // 서버 쪽으로 쿠키 전달
+    const cookie = context.req ? context.req.headers.cookie : "";
+    axios.defaults.headers.Cookie = "";
+
+    // 쿠키를 요청할때만 서버에 보내줌 !!엄청 중요함!!!!!
+    if (context.req && cookie) {
+      axios.defaults.headers.Cookie = cookie;
+    }
+
+    context.store.dispatch({
+      // type: LOAD_USER_REQUEST,
+      type: LOAD_MY_INFO_REQUEST,
+    });
+    context.store.dispatch({
+      type: LOAD_POST_REQUEST,
+    });
+    context.store.dispatch(END);
+    await context.store.sagaTask.toPromise();
+  }
+);
 
 export default Signup;

@@ -5,7 +5,10 @@ import PostCard from "../components/PostCard";
 import PostForm from "../components/PostForm";
 import { LOAD_POST_REQUEST } from "../reducers/post";
 import { useInView } from "react-intersection-observer";
-import { LOAD_USER_REQUEST } from "../reducers/user";
+import { LOAD_MY_INFO_REQUEST } from "../reducers/user";
+import wrapper from "../store/configureStore";
+import { END } from "redux-saga";
+import axios from "axios";
 
 const Home = () => {
   /**
@@ -23,14 +26,14 @@ const Home = () => {
    * 로그인 여부
    * 게시글 불러오기
    */
-  useEffect(() => {
-    dispatch({
-      type: LOAD_USER_REQUEST,
-    });
-    dispatch({
-      type: LOAD_POST_REQUEST,
-    });
-  }, []);
+  // useEffect(() => {
+  //   dispatch({
+  //     type: LOAD_USER_REQUEST,
+  //   });
+  //   dispatch({
+  //     type: LOAD_POST_REQUEST,
+  //   });
+  // }, []);
 
   useEffect(() => {
     if (retweetError) {
@@ -120,5 +123,34 @@ const Home = () => {
     </AppLayout>
   );
 };
+
+/**
+ * export default Home 보다 먼저 실행됨
+ * - 프론트 서버에서 실행됨
+ * - 쿠키 전달해야함
+ */
+export const getServerSideProps = wrapper.getServerSideProps(
+  async (context) => {
+    // console.log("context : ", context);
+    // 서버 쪽으로 쿠키 전달
+    const cookie = context.req ? context.req.headers.cookie : "";
+    axios.defaults.headers.Cookie = "";
+
+    // 쿠키를 요청할때만 서버에 보내줌 !!엄청 중요함!!!!!
+    if (context.req && cookie) {
+      axios.defaults.headers.Cookie = cookie;
+    }
+
+    context.store.dispatch({
+      // type: LOAD_USER_REQUEST,
+      type: LOAD_MY_INFO_REQUEST,
+    });
+    context.store.dispatch({
+      type: LOAD_POST_REQUEST,
+    });
+    context.store.dispatch(END);
+    await context.store.sagaTask.toPromise();
+  }
+);
 
 export default Home;

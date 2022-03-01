@@ -25,7 +25,7 @@ const PostCard = ({ post }) => {
   const id = me?.id;
 
   // const liked = post.Likers.find((value) => value.id === id);
-  console.log("TYPE ", typeof post.Likers);
+  // console.log("TYPE ", typeof post.Likers);
   const liked = post.Likers.find((value) => value.id === me?.id);
 
   const { removePostLoading } = useSelector((state) => state.post);

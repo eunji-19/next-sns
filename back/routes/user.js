@@ -1,14 +1,17 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
-const passport = require("passport");
+const { Post, Comment, Image, Hashtag, User } = require("../models");
 const { isLoggedIn, isNotLoggedIn } = require("./middlewares");
-const { User, Post } = require("../models"); // 구조분해 할당 (db.User -> User)
+const { Op } = require("sequelize");
+const passport = require("passport"); // 구조분해 할당 (db.User -> User)
 const router = express.Router();
 
 /**
  * 로그인 유지
+ * -> LoadMyInfo 로 변경
  */
 router.get("/login", async (req, res, next) => {
+  console.log("cookie ", req.headers);
   try {
     console.log("user id ", req.user);
     if (req.user) {
@@ -270,6 +273,116 @@ router.delete("/follower/:userId", isLoggedIn, async (req, res, next) => {
 
     await findUser.removeFollowing(req.user.id);
     res.status(200).json({ UserId: parseInt(req.params.userId, 10) });
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+});
+
+/**
+ * 사용자 정보 가져오기
+ */
+router.get("/info/:userId", async (req, res, next) => {
+  try {
+    const fullUserWithoutPassword = await User.findOne({
+      where: { id: req.params.userId },
+      // attributes: ["id", "email", "nickname"],
+      attributes: {
+        exclude: ["password"],
+      },
+      include: [
+        {
+          model: Post,
+          attributes: ["id"],
+        },
+        {
+          model: User,
+          as: "Following",
+          attributes: ["id"],
+        },
+        {
+          model: User,
+          as: "Followers",
+          attributes: ["id"],
+        },
+      ],
+    });
+    if (fullUserWithoutPassword) {
+      /**
+       * sequelize에서 보내준 데이터는 JSON 타입이 아님
+       * -> 개인정보 처리 예방
+       */
+      const data = fullUserWithoutPassword.toJSON();
+      data.Posts = data.Posts.length;
+      data.Following = data.Following.length;
+      data.followers = data.followers.length;
+
+      res.status(200).json(data);
+    } else {
+      res.status(404).json("존재하지 않는 사용자입니다");
+    }
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+});
+
+router.get(`/:userId/posts`, async (req, res, next) => {
+  try {
+    const where = { UserId: req.params.userId };
+    if (parseInt(req.query.lastId, 10)) {
+      // 초기 로딩이 아닐 때
+      where.id = { [Op.lt]: parseInt(req.query.lastId, 10) };
+      // 초기로딩일때 -> 최근 10개 가져오기
+    }
+    const posts = await Post.findAll({
+      //   where: { UserId: 1 },
+      //   where: { id: lastId },
+      where,
+      limit: 10, // 10개씩 가져오기
+      //   offsett: 0, // 1 ~ 10(1번 게시글부터 10번게시글까지) if 10 -> (10번 게시글부터 20번게시글까지)
+      order: [
+        ["createdAt", "DESC"],
+        [Comment, "createdAt", "DESC"],
+      ],
+      include: [
+        {
+          model: User,
+          attributes: ["id", "nickname"],
+        },
+        {
+          model: Image,
+        },
+        {
+          model: Comment,
+          include: [
+            {
+              model: User,
+              attributes: ["id", "nickname"],
+            },
+          ],
+        },
+        {
+          model: User, // 좋아요 누른 사람 ,
+          as: "Likers",
+          attributes: ["id"],
+        },
+        {
+          model: Post,
+          as: "Retweet",
+          include: [
+            {
+              model: User,
+              attributes: ["id", "nickname"],
+            },
+            {
+              model: Image,
+            },
+          ],
+        },
+      ],
+    });
+    res.status(200).json(posts);
   } catch (err) {
     console.error(err);
     next(err);

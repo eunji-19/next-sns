@@ -31,7 +31,11 @@ export const initialState = {
   removeFollowerLoading: false, // 팔로우 시도중
   removeFollowerDone: false,
   removeFollowerError: null,
+  loadMyInfoLoading: false, // 내 정보 가져오기
+  loadMyInfoDone: false,
+  loadMyInfoError: null,
   me: null,
+  userInfo: null,
   // signupData: {},
   signupData: null,
   loginData: {},
@@ -80,6 +84,10 @@ export const REMOVE_FOLLOWER_REQUEST = "REMOVE_FOLLOWER_REQUEST";
 export const REMOVE_FOLLOWER_SUCCESS = "REMOVE_FOLLOWER_SUCCESS";
 export const REMOVE_FOLLOWER_FAILURE = "REMOVE_FOLLOWER_FAILURE";
 
+export const LOAD_MY_INFO_REQUEST = "LOAD_MY_INFO_REQUEST";
+export const LOAD_MY_INFO_SUCCESS = "LOAD_MY_INFO_SUCCESS";
+export const LOAD_MY_INFO_FAILURE = "LOAD_MY_INFO_FAILURE";
+
 // action creator
 export const loginRequestAction = (data) => {
   return {
@@ -116,6 +124,22 @@ const dummyUser = (data) => ({
 const reducer = (state = initialState, action) => {
   return produce(state, (draft) => {
     switch (action.type) {
+      case LOAD_MY_INFO_REQUEST:
+        draft.loadMyInfoLoading = true;
+        draft.loadMyInfoDone = false;
+        draft.loadMyInfoError = null;
+        break;
+      case LOAD_MY_INFO_SUCCESS:
+        draft.loadMyInfoLoading = false;
+        draft.loadMyInfoDone = true;
+        draft.loadMyInfoError = null;
+        draft.me = action.data;
+        break;
+      case LOAD_MY_INFO_FAILURE:
+        draft.loadMyInfoLoading = false;
+        draft.loadMyInfoDone = false;
+        draft.loadMyInfoError = action.error;
+        break;
       case LOAD_USER_REQUEST:
         draft.loadUserLoading = true;
         draft.loadUserDone = false;
@@ -125,7 +149,7 @@ const reducer = (state = initialState, action) => {
         draft.loadUserLoading = false;
         draft.loadUserDone = true;
         draft.loadUserError = null;
-        draft.me = action.data;
+        draft.userInfo = action.data;
         break;
       case LOAD_USER_FAILURE:
         draft.loadUserLoading = false;

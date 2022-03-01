@@ -18,9 +18,18 @@ import {
   LIKE_POST_FAILURE,
   LIKE_POST_REQUEST,
   LIKE_POST_SUCCESS,
+  LOAD_HASHTAG_POSTS_FAILURE,
+  LOAD_HASHTAG_POSTS_REQUEST,
+  LOAD_HASHTAG_POSTS_SUCCESS,
   LOAD_POST_FAILURE,
   LOAD_POST_REQUEST,
   LOAD_POST_SUCCESS,
+  LOAD_SPECIFIC_POST_FAILURE,
+  LOAD_SPECIFIC_POST_REQUEST,
+  LOAD_SPECIFIC_POST_SUCCESS,
+  LOAD_USER_POSTS_FAILURE,
+  LOAD_USER_POSTS_REQUEST,
+  LOAD_USER_POSTS_SUCCESS,
   LPLOAD_IMAGES_FAILURE,
   LPLOAD_IMAGES_REQUEST,
   LPLOAD_IMAGES_SUCCESS,
@@ -269,6 +278,84 @@ function* watchRetweet() {
   yield takeLatest(RETWEET_REQUEST, retweet);
 }
 
+function loadSpecificPostAPI(data) {
+  return axios.get(`/post/${data}`);
+}
+
+function* loadSpecificPost(action) {
+  try {
+    const result = yield call(loadSpecificPostAPI, action.data);
+    yield put({
+      type: LOAD_SPECIFIC_POST_SUCCESS,
+      data: result.data,
+    });
+  } catch (err) {
+    console.error(err);
+    yield put({
+      type: LOAD_SPECIFIC_POST_FAILURE,
+      error: err.response.data,
+    });
+  }
+}
+
+function* watchLoadSpecificPost() {
+  yield takeLatest(LOAD_SPECIFIC_POST_REQUEST, loadSpecificPost);
+}
+
+function loadUserPostsAPI(data, lastId) {
+  return axios.get(`/user/${data}/posts?lastId=${lastId || 0}`);
+}
+
+function* loadUserPosts(action) {
+  try {
+    const result = yield call(loadUserPostsAPI, action.data, action.lastId);
+    yield put({
+      type: LOAD_USER_POSTS_SUCCESS,
+      data: result.data,
+    });
+  } catch (err) {
+    console.error(err);
+    yield put({
+      type: LOAD_USER_POSTS_FAILURE,
+      error: err.response.data,
+    });
+  }
+}
+
+function* watchLoadUserPosts() {
+  yield takeLatest(LOAD_USER_POSTS_REQUEST, loadUserPosts);
+}
+
+/**
+ * 한글처리
+ * - encodeURIComponent
+ */
+function loadHashtagPostsAPI(data, lastId) {
+  return axios.get(
+    `/hashtag/${encodeURIComponent(data)}?lastId=${lastId || 0}`
+  );
+}
+
+function* loadHashtagPosts(action) {
+  try {
+    const result = yield call(loadHashtagPostsAPI, action.data, action.lastId);
+    yield put({
+      type: LOAD_HASHTAG_POSTS_SUCCESS,
+      data: result.data,
+    });
+  } catch (err) {
+    console.error(err);
+    yield put({
+      type: LOAD_HASHTAG_POSTS_FAILURE,
+      data: err.response.data,
+    });
+  }
+}
+
+function* watchLoadHashtagPosts() {
+  yield takeLatest(LOAD_HASHTAG_POSTS_REQUEST, loadHashtagPosts);
+}
+
 export default function* postSaga() {
   yield all([
     fork(watchLoadPost),
@@ -279,5 +366,8 @@ export default function* postSaga() {
     fork(watchUnlikePost),
     fork(watchUploadImages),
     fork(watchRetweet),
+    fork(watchLoadSpecificPost),
+    fork(watchLoadUserPosts),
+    fork(watchLoadHashtagPosts),
   ]);
 }
